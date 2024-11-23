@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    
+  <style>
+
+  
+  </style>
+  </head>
+  
+    
+ 
+  <body>
+    
+   <form onsubmit="handleFormSubmit(event)">
+    Select a Date :<input type="Date" name="date" value="date">
+    <button style="background-color: rgb(64, 64, 204); color: white; padding: 10px 20px; border: none; border-radius: 5px;" type="submit">Search </button>
+   </form>
+   <button style="background-color:rgb(95, 151, 95); color: white; padding: 10px 20px; border: none; border-radius: 5px;"onclick="handleForm()">Fetch Attendance Report</button>
+   
+   <ul id="login">
+        
+   </ul>
+   <ul id="showAttendance">
+        
+   </ul>
+   <ul id="showTotal">
+        
+   </ul>
+  
+    
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+  <script src="index.js"></script>
+</html>
