@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day to Day Expenses</title>
+  <link rel="stylesheet" href="dailyBasis.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <form onsubmit="dayExpense(event)">
+        Fetch Day report :<input type="date" name="date"></input></p>
+        <button type="submit">Submit</button>
+
+      </form><br>
+      <form onsubmit="weekExpense(event)">
+        Fetch Week report :<input type="week" name="week"></input></p>
+        <button type="submit">Submit</button>
+      </form><br>
+      <form onsubmit="monthExpense(event)">
+        Fetch Month report :<input type="month" name="month"></input></p>
+        <button type="submit">Submit</button>
+
+      </form>
+      
+    </header>
+    
+    <section class="table-section">
+      
+      <table id="tables">
+      <h1>Selected day expenses</h1> 
+        
+       
+        
+      </table>
+    </section>
+    
+
+      
+    
+    
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="./dailyBasis.js"></script>
+</body>
+</html>

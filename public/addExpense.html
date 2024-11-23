@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Expense</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+  </head>
+  <body>
+    
+    <div class="container">
+      <form novalidate onsubmit="handleFormSubmit(event)">
+        
+        <label for="amount" class="form-label ">choose expense amountt</label>
+        <div class="input-group">
+        <div class="input-group-text">Rs.</div>
+        <input type="number" name="amount" id="amount" class="form-control" required/>
+        <div class="input-group-text">.00</div>
+        </div>
+        <label for="text" class="form-label">choose description</label>
+        <input type="text" name="text" id="text" class="form-control" required/>
+        <label for="cate" class="form-label">Choose a category</label>
+        
+        <select class="form-select" name="cate" id="cate" >
+          <option>Fuel</option>
+          <option>Food</option>
+          <option>Electricty</option>
+          <option>Movie</option>
+          
+        </select>
+        <button type="submit">Submit</button>
+      </form>
+      
+      <form novalidate onsubmit="handleFormIncomeSubmit(event)">
+        
+        <label for="amount" class="form-label ">choose income amountt</label>
+        <div class="input-group">
+        <div class="input-group-text">Rs.</div>
+        <input type="number" name="amount" id="income" class="form-control" required/>
+        <div class="input-group-text">.00</div>
+        </div>
+        <label for="text" class="form-label">choose description</label>
+        <input type="text" name="text" id="textIncome" class="form-control" required/>
+        <label for="cate" class="form-label">Choose a category</label>
+        
+        <select class="form-select" name="cate" id="cateIncome" >
+          <option>Salary</option>
+          <option>Bussiness</option>
+          <option>Other</option>
+          
+        </select>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="message"></div>
+      <button id="rzp-button">Buy Premium</button>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      
+      <ul id="listOfItems"></ul>
+      <div style="display: flex; justify-content: center; align-items: center;" id="pagination"></div>
+    
+      <ul id="listOfIncomes"></ul>
+      <div style="display: flex; justify-content: center; align-items: center;" id="paginationIncome"></div>
+      <div id="leaderboard"></div>
+      
+    </div>
+    <a>------only for premium users-----</a><br>
+    <a id="message1" style="color:blue"></a>
+    <button onclick="showLeaderBoard()">Show leaderboard</button><br>
+    <a id="message2" style="color:blue"></a>
+    <button onclick="download()" id="downloadexpense">Download File</button> <br>
+    <a id="message3" style="color:blue"></a>
+    <a id="showUrl" ></a>
+    <button onclick="totaldownload()">List of downloaded files</button><br>
+    <ul id="totaldownloads"></ul>
+    <a id="message4" style="color:blue"></a>
+    <button onclick="dailyBasis()">click here to see daily,weekly,monthly basis</button> <br><br>
+    <form onsubmit="userPages(event)">
+      expenses per page :<input type="number" name="pagess"></input>
+      <button type="submit">Submit</button>
+    </form>
+    
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+  <script src="addExpense.js"></script>
+</html>
