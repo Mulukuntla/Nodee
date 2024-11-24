@@ -37,7 +37,7 @@ const forgotpassword = async (req, res) => {
             to: receivers,
             subject: "Password Reset Request",
             textContent: "Click the link below to reset your password:\n" +
-                         `http://51.20.67.98:4000/password/resetpassword/${id}`,
+                         `http://51.20.92.132:4000/password/resetpassword/${id}`,
         });
         
         console.log(response);  // Log the response from Sendinblue

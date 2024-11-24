@@ -13,6 +13,8 @@ const Expense= require("./models/ExpenseTracker")
 const Order=require("./models/orders")
 const Forgotpassword = require("./models/forgotPassword")
 const downloadss=require("./models/allDownloads")
+const income = require('./routes/incomeTracker');
+const incomeTracker=require("./models/income")
 
 
 const sequelize=require('./util/database')
@@ -51,6 +53,7 @@ app.use("/expense",expenseTrackerRoutes)
 app.use("/purchase",purchaseRoutes)
 app.use("/premium",premiumFeatureRoutes)
 app.use('/password', resetPasswordRoutes);
+app.use("/income",income)
 
 app.use((req,res)=>{
   console.log("urll",req.url)
@@ -73,6 +76,9 @@ Forgotpassword.belongsTo(User);
 
 User.hasMany(downloadss);
 downloadss.belongsTo(User);
+
+User.hasMany(incomeTracker)
+incomeTracker.belongsTo(User)
 
 
 app.get('/search', (req, res) => {
