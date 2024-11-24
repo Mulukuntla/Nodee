@@ -1,5 +1,6 @@
 const Expense= require("../models/Expense")
 const ExpenseTracker= require("../models/ExpenseTracker")
+const Income= require("../models/income")
 const bcrypt = require('bcrypt');
 const jwt=require("jsonwebtoken")
 const AWS=require("aws-sdk")
@@ -14,6 +15,7 @@ function isstringinvalid(string){
     return true
   }
   else{
+    
     return false
   }
 
@@ -31,16 +33,13 @@ const signup= async (req,res,next) =>{
       return res.status(400).json({err:"Bad parameters - Something is missing"})
     }
     const saltrounds=10
-    console.log(saltrounds)
     bcrypt.hash(password,saltrounds,async (err,hash)=>{
-      console.log(err)
+      
       await Expense.create({userName:name,email:email,password:hash})
     
       res.status(201).json({message:"Successfully created a new user"})
 
     })
-    
-    
   }  
   catch(err){
     res.status(500).json(err);
@@ -63,28 +62,27 @@ const signin= async (req,res,next) =>{
     }
     const user=await Expense.findAll({ where: { email} })
       
-      if(user.length>0){
-        bcrypt.compare(password,user[0].password,(err,result)=>{
-          if(err){
-            throw new Error("Something went wrong")
-
-          }
-          if(result === true){
+    if(user.length>0){
+      bcrypt.compare(password,user[0].password,(err,result)=>{
+        if(err){
+          throw new Error("Something went wrong")
+        }
+        if(result === true){
             return res.status(200).json({success:true,message:"User loggedin Successfully",token:generateAccessToken(user[0].id,user[0].userName,user[0].ispremiumuser)})
   
-          }
-          else{
-            return res.status(401).json({success:false,message:"Password is incorrect"})
+        }
+        else{
+          return res.status(401).json({success:false,message:"Password is incorrect"})
   
-          }
+        }
 
         })
         
       }
-      else{
-        return res.status(404).json({success:false,message:"User not found"})
+    else{
+      return res.status(404).json({success:false,message:"User not found"})
 
-      }
+    }
      
   }  
   catch(err){
@@ -94,19 +92,30 @@ const signin= async (req,res,next) =>{
 
 const download= async (req,res,next) =>{
   try{
-    const expenses= await UserServices.getExpenses(req)
-    console.log(expenses)
-    const stringifiedExpenses=JSON.stringify(expenses)
+    const user=await Expense.findOne({where:{id:req.user.id}})
+    if(user.ispremiumuser===null){
+      return res.status(401).json({success:false,message:"not a premium user"})
+    }
+    const expenses = await ExpenseTracker.findAll({where: {userId: req.user.id,},})
+    const incomes = await Income.findAll({where: {userId: req.user.id,},})
+      
+    const combined = [...expenses, ...incomes]
+    const sortedTransactions = combined.sort((a, b) => {
+       
+      return new Date(a.updatedAt) - new Date(b.updatedAt);
+      
+    })  
+    
+    const stringifiedExpenses=JSON.stringify(sortedTransactions)
     const userId=req.user.id
     
     const filename=`Expense${userId}/${new Date()}.txt`
+    console.log(expenses)
+    console.log(stringifiedExpenses)
     const fileUrl=await S3service.uploadToS3(stringifiedExpenses,filename)
     const data=await allDownloads.create({date:new Date(),links:fileUrl,userId:req.user.id})
-    console.log("data",data)
-    res.status(200).json({fileUrl,success:true})
     
-  
-
+    res.status(200).json({fileUrl,success:true})
   }
   catch(err){
     console.log(err)
@@ -118,29 +127,41 @@ const download= async (req,res,next) =>{
 }
 const totaldownloads= async (req,res,next) =>{
   try{
-   
+    const user=await Expense.findOne({where:{id:req.user.id}})
+    if(user.ispremiumuser===null){
+      return res.status(401).json({success:false,message:"not a premium user"})
+    }
     const data=await allDownloads.findAll({where:{userId:req.user.id}})
-    console.log(data)
-    res.status(200).json({totallinks:data,success:false})
     
-  
-
+    res.status(200).json({totallinks:data,success:true})
   }
   catch(err){
     console.log(err)
     res.status(500).json({fileUrl:"",success:false,err:err})
 
   }
- 
-  
 }
+const ispremiumuser= async (req,res,next) =>{
+  try{
+    const user=await Expense.findOne({where:{id:req.user.id}})
+    if(user.ispremiumuser===null){
+      return res.status(401).json({success:false,message:"not a premium user"})
+    }
+    res.status(201).json({success:true,message:"premium user"})
+  }
+  catch(err){
+    console.log(err)
+    res.status(500).json({fileUrl:"",success:false,err:err})
 
+  }
+}
 
     
 module.exports={
     signup,
     signin,
     download,
-    totaldownloads
+    totaldownloads,
+    ispremiumuser
     
 }
