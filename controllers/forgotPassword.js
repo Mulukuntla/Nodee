@@ -1,7 +1,5 @@
 const uuid = require('uuid');
-const sgMail = require('@sendgrid/mail');
 const bcrypt = require('bcrypt');
-
 const User = require('../models/Expense');
 const Forgotpassword = require('../models/forgotPassword');
 const Sib=require("sib-api-v3-sdk")
@@ -11,18 +9,16 @@ const forgotpassword = async (req, res) => {
     const client = Sib.ApiClient.instance;
     const apiKey = client.authentications["api-key"];
     apiKey.apiKey = process.env.SENGRID_API_KEY;  // Assuming you have the Sendinblue API key in environment variable
-
     const tranEmailApi = new Sib.TransactionalEmailsApi();
     const { email } =  req.body;
     const id = uuid.v4();
-        const user = await User.findOne({where : { email }});
-        if(user){
-            
-            user.createForgotpassword({ id , active: true })
-                .catch(err => {
-                    throw new Error(err)
-                })
-            }
+    const user = await User.findOne({where : { email }});
+    if(user){
+        user.createForgotpassword({ id , active: true })
+            .catch(err => {
+                throw new Error(err)
+            })
+        }
     const sender = {
         email: "yours.saisaketh@gmail.com",  // Replace with a verified sender email
     };
@@ -37,15 +33,12 @@ const forgotpassword = async (req, res) => {
             to: receivers,
             subject: "Password Reset Request",
             textContent: "Click the link below to reset your password:\n" +
-                         `http://51.20.92.132:4000/password/resetpassword/${id}`,
+                         `http://localhost:4008/password/resetpassword/${id}`,
         });
-        
-        console.log(response);  // Log the response from Sendinblue
-
-        // Respond back to the client indicating success
+        console.log(response); 
         res.status(200).json({ message: "Password reset link sent to your email." });
-
-    } catch (err) {
+    } 
+    catch (err) {
         // Catch errors from the API call
         console.error(err);
         res.status(500).json({ message: "An error occurred while sending the email.", success: false });
@@ -54,46 +47,43 @@ const forgotpassword = async (req, res) => {
 }
 
 const resetpassword = (req, res) => {
+    try{
     const id =  req.params.id;
     console.log(id)
     Forgotpassword.findOne({ where : { id:id,active:true}}).then(forgotpasswordrequest => {
         console.log(forgotpasswordrequest)
-       
-        
         if(forgotpasswordrequest !=null){
             forgotpasswordrequest.update({ active: false});
-            
-            res.status(200).send(`<html>
-                                    <script>
-                                        function formsubmitted(e){
-                                            e.preventDefault();
-                                            console.log('called')
-                                        }
-                                    </script>
+            res.status(200).send(
+            `<html>
+                <script>
+                    function formsubmitted(e){
+                        e.preventDefault();
+                        console.log('called')
+                    }
+                </script>
 
-                                    <form action="/password/updatepassword/${id}" method="get">
-                                        <label for="newpassword">Enter New password</label>
-                                        <input name="newpassword" type="password" required></input>
-                                        <button>reset password</button>
-                                    </form>
-                                </html>`
-                                )
+                <form action="/password/updatepassword/${id}" method="get">
+                    <label for="newpassword">Enter New password</label>
+                    <input name="newpassword" type="password" required></input>
+                    <button>reset password</button>
+                </form>
+            </html>`
+            )
             res.end()
             }
             else{
                 res.status(200).send(`<html>
-                   
-
-                    <h1>Link Expired</h1>
+                   <h1>Link Expired</h1>
                 </html>`
                 )
             }
-            
-        
-    }).catch(err =>{
-        
+        })
+    }
+    catch(err){
+        res.status(500).json({ message: "An error occurred", success: false });
         console.log(err)
-    })
+    }
   
 }
     
@@ -108,7 +98,6 @@ const updatepassword = async (req, res) => {
                 // console.log('userDetails', user)
                 if(user) {
                     //encrypt the password
-
                     const saltRounds = 10;
                     bcrypt.genSalt(saltRounds, function(err, salt) {
                         if(err){
@@ -143,5 +132,4 @@ module.exports = {
     forgotpassword,
     updatepassword,
     resetpassword
-
 }
