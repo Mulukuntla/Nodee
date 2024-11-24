@@ -17,6 +17,21 @@ const Expense=sequelize.define("ExpenseTracker",{
   category:{
     type:Sequelize.STRING,
    
+  },
+  date:{
+    type:Sequelize.DATEONLY
+
+  },
+  week:{
+    type:Sequelize.INTEGER
+
+  },
+  month:{
+    type:Sequelize.INTEGER
+  },
+  year:{
+    type:Sequelize.INTEGER
+
   }
  
 });
