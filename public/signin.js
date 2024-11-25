@@ -7,7 +7,7 @@ async function signin(event){
         email:email,
         password:password
     }
-    const response=await axios.post("http://51.20.92.132:4000/user/signin",obj)
+    const response=await axios.post("http://16.170.220.229:4000/user/signin",obj)
     alert(response.data.message)
     console.log(response.data)
     document.body.innerHTML+=`<div style="color:green;">${response.data.message}<div>`

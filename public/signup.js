@@ -10,7 +10,7 @@ async function signup(event){
       password:password
     }
     console.log(obj)
-    const response=await axios.post("http://51.20.92.132:4000/user/signup",obj)
+    const response=await axios.post("http://16.170.220.229:4000/user/signup",obj)
     console.log("created")
     console.log(response.data)
     window.location.href = "./signin.html";
