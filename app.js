@@ -58,6 +58,7 @@ app.use("/income",income)
 app.use((req,res)=>{
   console.log("urll",req.url)
   console.log("originalurll",req.originalUrl)
+  console.log("request was successfull")
 res.sendFile(path.join(__dirname,`public/${req.url}`));
 
 })
