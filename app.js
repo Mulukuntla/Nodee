@@ -98,7 +98,7 @@ sequelize
 .sync()
 .then(result =>{
   console.log(result)
-  const PORT = process.env.PORT || 4008; // Change to a different port
+  const PORT = process.env.PORT || 4000; // Change to a different port
   app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
