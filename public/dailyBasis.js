@@ -6,7 +6,7 @@ async function dayExpense(event){
         date:date
     }
     const token=localStorage.getItem("token")
-    const res=await axios.post(`http://51.20.210.96:4000/expense/day-expense`,obj,{ headers: {"Authorization" : token} })
+    const res=await axios.post(`http://51.20.190.3:4000/expense/day-expense`,obj,{ headers: {"Authorization" : token} })
     const incomes=res.data.newUserDetail.income
     const expenses=res.data.newUserDetail.expense
     const day=document.getElementById("tables")
@@ -87,7 +87,7 @@ async function weekExpense(event){
             week:week
         }
         const token=localStorage.getItem("token")
-        const res=await axios.post(`http://51.20.210.96:4000/expense/week-expense`,obj,{ headers: {"Authorization" : token} })
+        const res=await axios.post(`http://51.20.190.3:4000/expense/week-expense`,obj,{ headers: {"Authorization" : token} })
         console.log(res.data)
         const day=document.getElementById("tables")
         const b=
@@ -138,7 +138,7 @@ async function monthExpense(event){
             month:month
         }
         const token=localStorage.getItem("token")
-        const res=await axios.post(`http://51.20.210.96:4000/expense/month-expense`,obj,{ headers: {"Authorization" : token} })
+        const res=await axios.post(`http://51.20.190.3:4000/expense/month-expense`,obj,{ headers: {"Authorization" : token} })
         const day=document.getElementById("tables")
         const b=
         `
