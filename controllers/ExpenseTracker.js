@@ -26,7 +26,7 @@ const addExpense= async (req,res,next) =>{
     }
     dayjs.extend(isoWeek);
     const currentDate = dayjs();
-    const week = currentDate.isoWeek(); // ISO week number
+    const week = currentDate.isoWeek(); 
     const year = currentDate.year();
     const date =  currentDate.format('YYYY-MM-DD');
     const month = currentDate.month() + 1;
@@ -95,14 +95,11 @@ const deleteExpense= async (req,res) => {
     if(isstringvalid(uId)){
       return res.status(400).json({success:false,message:"not an valid id"})
     }
-    Expense.destroy({where:{id:uId,userId:req.user.id}},{transaction:t})
-    .then((noofrows)=>{
-      if(noofrows===0){
-        return res.status(404).json({success:false,message:"Expense doesnot belong to user"})
-      }
-     
+    const noofrows=Expense.destroy({where:{id:uId,userId:req.user.id}},{transaction:t})
+    if(noofrows===0){
+      return res.status(404).json({success:false,message:"Expense doesnot belong to user"})
+    }
     res.status(200).json({ide:uId,success:true,message:"deleted Successfully"});
-    })
     await t.commit()
   }
   catch(err){
@@ -115,61 +112,72 @@ const deleteExpense= async (req,res) => {
 
 const dayExpense= async (req,res,next) =>{
   console.log(req.body.date)
-  const date=req.body.date
+  
   try{
-    const expenses = await Expense.findAll({
-      where: {
-        userId: req.user.id,
-        date: date,
-      },
-      order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-    });
-    const incomes = await Income.findAll({
-      where: {
-        userId: req.user.id,
-        date: date,
-      },
-      order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-    })
-    const combined = [...expenses, ...incomes]
-    const sortedTransactions = combined.sort((a, b) => {
-      return new Date(a.updatedAt) - new Date(b.updatedAt);
-    })  
-    res.status(201).json({newUserDetail:sortedTransactions,success:true});
+    const date=req.body.date
+    if(isstringvalid(date)){
+      return res.status(400).json({success:false,message:"Parameters missing"})
+    }
+    const [expenses, incomes] = await Promise.all([
+      Expense.findAll({
+        where: {
+          userId: req.user.id,
+          date: date,
+        },
+        order: [['updatedAt', 'ASC']] 
+      }),
+      Income.findAll({
+        where: {
+          userId: req.user.id,
+          date:date,
+        },
+        order: [['updatedAt', 'ASC']] 
+      })
+    ]);
+    const sortedTransactions = [...expenses, ...incomes].sort(
+      (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt)
+    );
+    res.status(200).json({newUserDetail:sortedTransactions,success:true});
   }
   catch(error){
+    res.status(500).json({error:err,success:false,message:"failed"})
     console.log(error)
   }
   
 }
 const weekExpense= async (req,res,next) =>{
   try{
-  const year=req.body.year
   const week=req.body.week
-  const expenses = await Expense.findAll({
-    where: {
-      userId: req.user.id,
-      week: week,
-      year: year
-    },
-    order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-  });
-  const incomes = await Income.findAll({
-    where: {
-      userId: req.user.id,
-      week: week,
-      year: year
-    },
-    order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-  })
-  const combined = [...expenses, ...incomes]
-  const sortedTransactions = combined.sort((a, b) => {
-    // Compare by 'date' field of each transaction
-    return new Date(a.updatedAt) - new Date(b.updatedAt);
-  })  
-  res.status(201).json({newUserDetail:sortedTransactions,success:true});
+  const year=req.body.year
+  if(isstringvalid(week) || isstringvalid(year)){
+    return res.status(400).json({success:false,message:"Parameters missing"})
+  }
+  console.log(typeof week,typeof year)
+  const [expenses, incomes] = await Promise.all([
+    Expense.findAll({
+      where: {
+        userId: req.user.id,
+        week: week,
+        year: year
+      },
+      order: [['updatedAt', 'ASC']] 
+    }),
+    Income.findAll({
+      where: {
+        userId: req.user.id,
+        week: week,
+        year: year
+      },
+      order: [['updatedAt', 'ASC']] 
+    })
+  ]);
+  const sortedTransactions = [...expenses, ...incomes].sort(
+    (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt)
+  );
+  res.status(200).json({newUserDetail:sortedTransactions,success:true});
   }
   catch(error){
+    res.status(500).json({error:err,success:false,message:"failed"})
     console.log(error)
   }
 }
@@ -177,33 +185,36 @@ const weekExpense= async (req,res,next) =>{
 
 const monthExpense= async (req,res,next) =>{
   try{
-  const year=req.body.year
-  const month=req.body.month
-  const expenses = await Expense.findAll({
-    where: {
-      userId: req.user.id,
-      month: month,
-      year: year
-    },
-    order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-  });
-  const incomes = await Income.findAll({
-    where: {
-      userId: req.user.id,
-      month: month,
-      year: year
-    },
-    order: [['updatedAt', 'ASC']]  // Sort by date in ascending order
-  })
-  const combined = [...expenses, ...incomes]
-  const sortedTransactions = combined.sort((a, b) => {
-    // Compare by 'date' field of each transaction
-    console.log(a)
-    return new Date(a.updatedAt) - new Date(b.updatedAt);
-  })  
-  res.status(201).json({newUserDetail:sortedTransactions,success:true});
+    const month=req.body.month
+    const year=req.body.year
+    if(isstringvalid(month) || isstringvalid(year)){
+      return res.status(400).json({success:false,message:"Parameters missing"})
+    }
+    const [expenses, incomes] = await Promise.all([
+      Expense.findAll({
+        where: {
+          userId: req.user.id,
+          month: month,
+          year: year
+        },
+        order: [['updatedAt', 'ASC']] 
+      }),
+      Income.findAll({
+        where: {
+          userId: req.user.id,
+          month: month,
+          year: year
+        },
+        order: [['updatedAt', 'ASC']]  
+      })
+    ]);
+    const sortedTransactions = [...expenses, ...incomes].sort(
+      (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt)
+    );
+    res.status(200).json({newUserDetail:sortedTransactions,success:true});
   }
   catch(error){
+    res.status(500).json({error:error,success:false,message:"failed"})
     console.log(error)
   }
 }
@@ -211,11 +222,11 @@ const monthExpense= async (req,res,next) =>{
 
     
 module.exports={
-    addExpense,
-    getExpense,
-    deleteExpense,
-    dayExpense,
-    weekExpense,
-    monthExpense
+  addExpense,
+  getExpense,
+  deleteExpense,
+  dayExpense,
+  weekExpense,
+  monthExpense
     
 }

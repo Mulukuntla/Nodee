@@ -1,68 +1,69 @@
 const uuid = require('uuid');
 const sgMail = require('@sendgrid/mail');
 const bcrypt = require('bcrypt');
-
 const User = require('../models/Expense');
 const Forgotpassword = require('../models/forgotPassword');
 const Sib=require("sib-api-v3-sdk")
 
 
-const forgotpassword = async (req, res) => {
-    const client = Sib.ApiClient.instance;
-    const apiKey = client.authentications["api-key"];
-    apiKey.apiKey = process.env.SENGRID_API_KEY;  // Assuming you have the Sendinblue API key in environment variable
 
-    const tranEmailApi = new Sib.TransactionalEmailsApi();
-    const { email } =  req.body;
-    const id = uuid.v4();
-        const user = await User.findOne({where : { email }});
-        if(user){
-            
-            user.createForgotpassword({ id , active: true })
-                .catch(err => {
-                    throw new Error(err)
-                })
-            }
-    const sender = {
-        email: "yours.saisaketh@gmail.com",  // Replace with a verified sender email
-    };
-    const receivers = [{
-        email:email,  // Get the user's email from the request body
-    }];
+function isstringvalid(string){
+    if(string.length===0 || string==undefined){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+const forgotpassword = async (req, res) => {
     
-    try {
-        // Send the transactional email using Sendinblue API
+    try{
+        const { email } =  req.body;
+        if(isstringvalid(email)){
+            return res.status(400).json({success:false,message:"Parameters missing"})
+        }
+        const client = Sib.ApiClient.instance;
+        const apiKey = client.authentications["api-key"];
+        apiKey.apiKey = process.env.SENGRID_API_KEY;
+        const tranEmailApi = new Sib.TransactionalEmailsApi();
+        const id = uuid.v4();
+        const user = await User.findOne({where : { email }});
+        if(user ==null){
+            return res.status(404).json({message:"user not found",success:false})
+        }
+        if(user){
+           await user.createForgotpassword({ id , active: true })
+        }
+        const sender = {
+            email: "yours.saisaketh@gmail.com",
+        };
+        const receivers = [{
+            email:email,
+        }];
         const response = await tranEmailApi.sendTransacEmail({
             sender,
             to: receivers,
             subject: "Password Reset Request",
             textContent: "Click the link below to reset your password:\n" +
-                         `http://51.20.92.132:4000/password/resetpassword/${id}`,
+                            `http://51.20.190.3:4000/password/resetpassword/${id}`,
         });
-        
-        console.log(response);  // Log the response from Sendinblue
-
-        // Respond back to the client indicating success
+        console.log(response);  
         res.status(200).json({ message: "Password reset link sent to your email." });
-
     } catch (err) {
-        // Catch errors from the API call
         console.error(err);
         res.status(500).json({ message: "An error occurred while sending the email.", success: false });
     }
 
 }
 
-const resetpassword = (req, res) => {
-    const id =  req.params.id;
-    console.log(id)
-    Forgotpassword.findOne({ where : { id:id,active:true}}).then(forgotpasswordrequest => {
-        console.log(forgotpasswordrequest)
-       
-        
+const resetpassword = async (req, res) => {
+    try{
+        const id =  req.params.id;
+        console.log(id)
+        const forgotpasswordrequest=await Forgotpassword.findOne({ where : { id:id,active:true}})
         if(forgotpasswordrequest !=null){
-            forgotpasswordrequest.update({ active: false});
-            
+            console.log(forgotpasswordrequest)
+            forgotpasswordrequest.update({ active: false},);
             res.status(200).send(`<html>
                                     <script>
                                         function formsubmitted(e){
@@ -79,21 +80,17 @@ const resetpassword = (req, res) => {
                                 </html>`
                                 )
             res.end()
-            }
-            else{
-                res.status(200).send(`<html>
-                   
-
-                    <h1>Link Expired</h1>
-                </html>`
-                )
-            }
-            
-        
-    }).catch(err =>{
-        
+        }
+        else{
+            res.status(401).send(`<html>
+                <h1>Link Expired</h1>
+            </html>`
+            )
+        }
+    }
+    catch(err){
         console.log(err)
-    })
+    }
   
 }
     
@@ -103,39 +100,36 @@ const updatepassword = async (req, res) => {
     try {
         const { newpassword } = req.query;
         const { resetpasswordid } = req.params;
-        Forgotpassword.findOne({ where : { id: resetpasswordid }}).then(resetpasswordrequest => {
-            User.findOne({where: { id : resetpasswordrequest.userId}}).then(user => {
-                // console.log('userDetails', user)
-                if(user) {
-                    //encrypt the password
-
-                    const saltRounds = 10;
-                    bcrypt.genSalt(saltRounds, function(err, salt) {
-                        if(err){
-                            console.log(err);
-                            throw new Error(err);
-                        }
-                        bcrypt.hash(newpassword, salt, function(err, hash) {
-                            // Store hash in your password DB.
-                            if(err){
-                                console.log(err);
-                                throw new Error(err);
-                            }
-                            user.update({ password: hash }).then(() => {
-                                res.status(201).json({message: 'Successfuly updated new password'})
-                            })
-                        });
-                    });
+        if(isstringvalid(newpassword)){
+            return res.status(400).json({success:false,message:"Parameters missing"})
+        }
+        const resetpasswordrequest=await Forgotpassword.findOne({ where : { id: resetpasswordid }})
+        const user=await User.findOne({where: { id : resetpasswordrequest.userId}})
+        if(user) {
+            const saltRounds = 10;
+            bcrypt.genSalt(saltRounds, function(err, salt) {
+                if(err){
+                    console.log(err);
+                    throw new Error(err);
+                }
+                bcrypt.hash(newpassword, salt,async function(err, hash) {
+                    if(err){
+                        console.log(err);
+                        throw new Error(err);
+                    }
+                    user.update({ password: hash },).then(() => {
+                        res.status(201).json({message: 'Successfuly updated new password'})
+                    })
+                });
+            });
             } else{
                 return res.status(404).json({ error: 'No user Exists', success: false})
             }
-            })
-        })
+            
     } catch(error){
-        return res.status(403).json({ error, success: false } )
+        
+        return res.status(403).json({ error:error, success: false } )
     }
-
-    
 }
 
 

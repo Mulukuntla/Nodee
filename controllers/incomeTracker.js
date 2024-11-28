@@ -16,6 +16,7 @@ function isstringvalid(string){
 
 
 const addIncome= async (req,res,next) =>{
+  const t=await sequelize.transaction()
   console.log(req.body.income)
   try{
     const income=req.body.income;
@@ -27,17 +28,19 @@ const addIncome= async (req,res,next) =>{
     dayjs.extend(isoWeek);
 
     const currentDate = dayjs();
-    const week = currentDate.isoWeek(); // ISO week number
+    const week = currentDate.isoWeek();
     const year = currentDate.year();
     const date =  currentDate.format('YYYY-MM-DD');
     const month = currentDate.month() + 1;
     console.log(date,week,year)
     console.log(income,description,category)
-    const data=await Income.create({income:income,description:description,category:category,userId:req.user.id,date:date,week:week,month:month,year:year})
+    const data=await Income.create({income:income,description:description,category:category,userId:req.user.id,date:date,week:week,month:month,year:year},{transaction:t})
     await res.status(201).json({newUserIncome:data,success:true});
+    await t.commit()
     
   }
   catch(err){
+    await t.rollback()
     console.log(err)
     res.status(500).json(err)
   }
@@ -76,19 +79,21 @@ const getIncome=async (req,res,next)=>{
 
 
 const deleteIncome=async (req,res,next)=>{
+  const t=await sequelize.transaction()
   try{
     const uId=req.params.id;
     if(isstringvalid(uId)){
         return res.status(400).json({success:false,message:"not an valid id"})
     }
-    const noofrows=Income.destroy({where:{id:uId,userId:req.user.id}})
+    const noofrows=Income.destroy({where:{id:uId,userId:req.user.id}},{transaction:t})
     if(noofrows===0){
       return res.status(404).json({success:false,message:"Expense doesnot belong to user"})
     }
     res.status(200).json({ide:uId,success:true,message:"deleted Successfully"});
+    await t.commit()
   }
   catch(err){
-      
+    await t.rollback()  
     console.log(err)
     res.status(500).json({error:err,success:false,message:"failed"})
   }
