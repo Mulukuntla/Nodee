@@ -1,10 +1,10 @@
 async function handleFormSubmit(event) {
   try{
-    const aa=document.getElementById("aa")
-    if (aa!=null){
-      aa.remove()
+    //const aa=document.getElementById("aa")
+    //if (aa!=null){
+    //  aa.remove()
 
-    }
+    //}
     event.preventDefault();
     const expense=event.target.amount.value;
     const description=event.target.text.value;
@@ -15,7 +15,7 @@ async function handleFormSubmit(event) {
       category
     };
     const token=localStorage.getItem("token")
-    const response=await axios.post("http://51.20.190.3:4000/expense/add-expense",obj,{headers :{"Authorization" :token}}) 
+    const response=await axios.post("http://51.20.172.55:4000/expense/add-expense",obj,{headers :{"Authorization" :token}}) 
     console.log(response.data.newUserDetail)
     console.log("created")
     displayUserOnScreen(response.data.newUserDetail)
@@ -61,9 +61,13 @@ function fetchAndDisplayUsers(allUsers) {
   var b;
   console.log("Hello")
   b=`<ul id="a"><h4>Expenses</h4>
-    <a id="aa"></a>
+    
     </ul>
   `
+  //b=`<ul id="a"><h4>Expenses</h4>
+  //  <a id="aa"></a>
+  //  </ul>
+  //`
   a.innerHTML=b
   allUsers.forEach(user => {
     console.log("HIII")
@@ -108,11 +112,11 @@ document.addEventListener('DOMContentLoaded',async function () {
     const page=1
     const token=localStorage.getItem("token")
     const pages=localStorage.getItem("pages")
-    const res=await axios.get(`http://51.20.190.3:4000/expense/get-expense?page=${page}&pages=${pages}`,{headers :{"Authorization" :token}})
+    const res=await axios.get(`http://51.20.172.55:4000/expense/get-expense?page=${page}&pages=${pages}`,{headers :{"Authorization" :token}})
     console.log(res.data)
     fetchAndDisplayUsers(res.data.products)
     showPagination(res.data)
-    const ress=await axios.get(`http://51.20.190.3:4000/income/get-income?page=${page}&pages=${pages}`,{headers :{"Authorization" :token}})
+    const ress=await axios.get(`http://51.20.172.55:4000/income/get-income?page=${page}&pages=${pages}`,{headers :{"Authorization" :token}})
     console.log(ress.data)
     fetchAndDisplayUsersIncome(ress.data.products)
     showPaginationIncome(ress.data)
@@ -127,7 +131,7 @@ document.addEventListener('DOMContentLoaded',async function () {
 async function deleteUser(userId) {
   try{
     const token=localStorage.getItem("token")
-    const response =await axios.delete(`http://51.20.190.3:4000/expense/delete-expense/${userId}`,{headers :{"Authorization" :token}})
+    const response =await axios.delete(`http://51.20.172.55:4000/expense/delete-expense/${userId}`,{headers :{"Authorization" :token}})
     removeUserFromScreen(response.data.ide);
   }
   catch(error){
@@ -142,14 +146,15 @@ function removeUserFromScreen(userId) {
 document.getElementById("rzp-button").onclick=async function (e){
   try{
     const token=localStorage.getItem("token")
-    const response=await axios.get("http://51.20.190.3:4000/purchase/premiummembership",{headers :{"Authorization" :token}})
+    const response=await axios.get("http://51.20.172.55:4000/purchase/premiummembership",{headers :{"Authorization" :token}})
     console.log(response)
     var options=
     {
       "key":response.data.key_id,
       "order_id":response.data.order.id,
       "handler":async function (response){
-        const transactionResponse=await axios.post("http://51.20.190.3:4000/purchase/updatetransactionstatus",{
+        console.log(response)
+        const transactionResponse=await axios.post("http://51.20.172.55:4000/purchase/updatetransactionstatus",{
           order_id:options.order_id,
           payment_id:response.razorpay_payment_id
         },{headers :{"Authorization" :token}})
@@ -160,7 +165,6 @@ document.getElementById("rzp-button").onclick=async function (e){
         const ispremiumuser=decodeToken.ispremiumuser
         if(ispremiumuser){
         showpremiumusermessage()
-        showLeaderBoard()
         }
       }
     }
@@ -168,7 +172,7 @@ document.getElementById("rzp-button").onclick=async function (e){
     rzp1.open()
     e.preventDefault()
     rzp1.on("payment.failed",async function (response){
-      const transactionResponses=await axios.post("http://51.20.190.3:4000/purchase/updatetransactionstatusfailed",{
+      const transactionResponses=await axios.post("http://51.20.172.55:4000/purchase/updatetransactionstatusfailed",{
       order_id:options.order_id,
       payment_id:response.error.metadata.payment_id
     },{headers :{"Authorization" :token}});
@@ -189,7 +193,7 @@ async function showLeaderBoard(){
       totaldownload.remove()
     }
     const token=localStorage.getItem("token")
-    const userLeaderBoardArray=await axios.get("http://51.20.190.3:4000/premium/showLeaderboard",{headers :{"Authorization" :token}})
+    const userLeaderBoardArray=await axios.get("http://51.20.172.55:4000/premium/showLeaderboard",{headers :{"Authorization" :token}})
     console.log(userLeaderBoardArray.data.userLeaderBoardDetails)
     const leaderboardElem=document.getElementById("leaderboard")
     const b=`<ul id=leader></ul>`
@@ -221,7 +225,7 @@ async function download(){
       totaldownload.remove()
     }
     const token=localStorage.getItem("token")
-    const response=await axios.get('http://51.20.190.3:4000/user/download', { headers: {"Authorization" : token} })
+    const response=await axios.get('http://51.20.172.55:4000/user/download', { headers: {"Authorization" : token} })
     if(response.status === 200){
       console.log(response)
       const a=document.getElementById("showUrl")
@@ -249,7 +253,7 @@ async function totaldownload(){
       leaderboard.remove()
     }
     const token=localStorage.getItem("token")
-    const response=await axios.get('http://51.20.190.3:4000/user/totaldownloads', { headers: {"Authorization" : token} })
+    const response=await axios.get('http://51.20.172.55:4000/user/totaldownloads', { headers: {"Authorization" : token} })
     if(response.status === 200){
     console.log(response.data)
     if(response.data.totallinks.length===0){
@@ -336,7 +340,7 @@ async function getProducts(page){
   try{
     const token=localStorage.getItem("token")
     const pages=localStorage.getItem("pages")
-    const res=await axios.get(`http://51.20.190.3:4000/expense/get-expense?page=${page}&pages=${pages}`,{ headers: {"Authorization" : token} })
+    const res=await axios.get(`http://51.20.172.55:4000/expense/get-expense?page=${page}&pages=${pages}`,{ headers: {"Authorization" : token} })
     fetchAndDisplayUsers(res.data.products)
     showPagination(res.data)
   }
@@ -355,7 +359,7 @@ function userPages(event){
 async function dailyBasis(){
   try{
   const token=localStorage.getItem("token")
-  const ispremiumuser=await axios.get(`http://51.20.190.3:4000/user/ispremiumuser`,{ headers: {"Authorization" : token} })
+  const ispremiumuser=await axios.get(`http://51.20.172.55:4000/user/ispremiumuser`,{ headers: {"Authorization" : token} })
   if(ispremiumuser){
     console.log("hai")
   window.location.href = "./dailyBasis.html";
@@ -386,7 +390,7 @@ async function handleFormIncomeSubmit(event) {
     };
     console.log(income,description,category)
     const token=localStorage.getItem("token")
-    const response=await axios.post("http://51.20.190.3:4000/income/add-income",obj,{headers :{"Authorization" :token}}) 
+    const response=await axios.post("http://51.20.172.55:4000/income/add-income",obj,{headers :{"Authorization" :token}}) 
     console.log(response)
     displayUserOnScreenIncome(response.data.newUserIncome)
     document.getElementById("income").value = "";
@@ -401,21 +405,14 @@ async function handleFormIncomeSubmit(event) {
 
 function fetchAndDisplayUsersIncome(allUsers){
   try{
-    const token=localStorage.getItem("token")
-    const decodeToken=parseJwt(token)
-    console.log(decodeToken)
-    const ispremiumuser=decodeToken.ispremiumuser
-    if(ispremiumuser){
-      showpremiumusermessage()
-    }
-    console.log("Hi")
+   
     console.log(allUsers)
     const a = document.getElementById("listOfIncomes");
     
-    var b=`<ul id="b"><h4>Incomes</h4></ul>
-      <a id="bb"></a>`
-    
-    
+    var b=`<ul id="b"><h4>Incomes</h4></ul>`
+      
+    //var b=`<ul id="b"><h4>Incomes</h4></ul>
+    //  <a id="bb"></a>`
     a.innerHTML=b
     allUsers.forEach(user => {
       console.log("HIII")
@@ -496,7 +493,7 @@ async function getproductsIncome(page){
   try{
     const token=localStorage.getItem("token")
     const pages=localStorage.getItem("pages")
-    const res=await axios.get(`http://51.20.190.3:4000/income/get-income?page=${page}&pages=${pages}`,{ headers: {"Authorization" : token} })
+    const res=await axios.get(`http://51.20.172.55:4000/income/get-income?page=${page}&pages=${pages}`,{ headers: {"Authorization" : token} })
     fetchAndDisplayUsersIncome(res.data.products)
     showPaginationIncome(res.data)
   }
@@ -509,7 +506,7 @@ async function getproductsIncome(page){
 async function deleteUserIncome(userId) {
   try{
     const token=localStorage.getItem("token")
-    const response=await axios.delete(`http://51.20.190.3:4000/income/delete-income/${userId}`,{headers :{"Authorization" :token}})
+    const response=await axios.delete(`http://51.20.172.55:4000/income/delete-income/${userId}`,{headers :{"Authorization" :token}})
     removeUserFromScreenIncome(response.data.ide);
   }
   catch(error){

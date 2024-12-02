@@ -10,13 +10,13 @@ async function signup(event){
       password:password
     }
     console.log(obj)
-    const response=await axios.post("http://51.20.190.3:4000/user/signup",obj)
+    const response=await axios.post("http://51.20.172.55:4000/user/signup",obj)
     console.log("created")
     console.log(response.data)
     window.location.href = "./signin.html";
   }
   catch(err){
     console.log(err)
-    document.body.innerHTML+=`<div style="color:red;">${err}<div>`
+    document.body.innerHTML+=`<div style="color:red;">${err.response.data.message}<div>`
   }
 }
